@@ -18,7 +18,7 @@
     },
     "autoload": {
         "psr-4": {
-            "WebEd\\Base\\ModulesManagement\\": "src"
+            "CleanSoft\\Modules\\Core\\ModulesManagement\\": "src"
         },
         "files": [
 
