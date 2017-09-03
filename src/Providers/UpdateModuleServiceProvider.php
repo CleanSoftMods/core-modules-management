@@ -1,23 +1,9 @@
-<?php namespace WebEd\Base\ModulesManagement\Providers;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
 class UpdateModuleServiceProvider extends ServiceProvider
 {
-    protected $module = 'WebEd\Base\ModulesManagement';
-
-    /**
-     * Bootstrap any application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        app()->booted(function () {
-            $this->booted();
-        });
-    }
-
     /**
      * Register any application services.
      *
@@ -27,11 +13,8 @@ class UpdateModuleServiceProvider extends ServiceProvider
     {
         register_module_update_batches('webed-modules-management', [
 
-        ]);
-    }
+        ], 'core');
 
-    protected function booted()
-    {
-        load_module_update_batches('webed-modules-management');
+        load_module_update_batches('webed-modules-management', 'core');
     }
 }

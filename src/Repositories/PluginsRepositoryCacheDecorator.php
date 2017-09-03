@@ -1,17 +1,17 @@
-<?php namespace WebEd\Base\ModulesManagement\Repositories;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Repositories;
 
-use WebEd\Base\Caching\Repositories\AbstractRepositoryCacheDecorator;
+use CleanSoft\Modules\Core\Repositories\Eloquent\EloquentBaseRepositoryCacheDecorator;
 
-use WebEd\Base\ModulesManagement\Repositories\Contracts\PluginsRepositoryContract;
+use CleanSoft\Modules\Core\ModulesManagement\Repositories\Contracts\PluginsRepositoryContract;
 
-class PluginsRepositoryCacheDecorator extends AbstractRepositoryCacheDecorator  implements PluginsRepositoryContract
+class PluginsRepositoryCacheDecorator extends EloquentBaseRepositoryCacheDecorator implements PluginsRepositoryContract
 {
     /**
      * @param $alias
-     * @return mixed
+     * @return mixed|null
      */
     public function getByAlias($alias)
     {
-        return $this->beforeGet(__FUNCTION__, func_get_args());
+        return $this->model->where('alias', '=', $alias)->first();
     }
 }

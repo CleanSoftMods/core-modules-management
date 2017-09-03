@@ -1,8 +1,12 @@
-<?php namespace WebEd\Base\ModulesManagement\Facades;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use WebEd\Base\ModulesManagement\Support\UpdateModulesSupport;
+use CleanSoft\Modules\Core\ModulesManagement\Support\UpdateModulesSupport;
 
+/**
+ * @method static registerUpdateBatches($moduleAlias, array $batches, string $type = 'plugins')
+ * @method static loadBatches($moduleAlias, string $type = 'plugins')
+ */
 class UpdateModulesFacade extends Facade
 {
     /**

@@ -1,4 +1,4 @@
-<?php namespace WebEd\Base\ModulesManagement\Hook;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Hook;
 
 
 class RegisterDashboardStats
@@ -9,8 +9,8 @@ class RegisterDashboardStats
 
     public function __construct()
     {
-        $this->modules = collect(get_all_module_information());
-        $this->plugins = $this->modules->where('type', '=', 'plugins');
+        $this->modules = get_core_module();
+        $this->plugins = get_plugin();
     }
 
     public function handle()

@@ -1,7 +1,7 @@
-<?php namespace WebEd\Base\ModulesManagement\Models;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Models;
 
-use WebEd\Base\ModulesManagement\Models\Contracts\PluginsModelContract;
-use WebEd\Base\Core\Models\EloquentBase as BaseModel;
+use CleanSoft\Modules\Core\ModulesManagement\Models\Contracts\PluginsModelContract;
+use CleanSoft\Modules\Core\Models\EloquentBase as BaseModel;
 
 class Plugins extends BaseModel implements PluginsModelContract
 {
@@ -9,9 +9,14 @@ class Plugins extends BaseModel implements PluginsModelContract
 
     protected $primaryKey = 'id';
 
-    protected $fillable = [];
+    protected $fillable = [
+        'alias',
+        'installed_version',
+        'enabled',
+        'installed',
+    ];
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function setEnabledAttribute($value)
     {

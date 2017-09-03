@@ -1,10 +1,14 @@
-<?php namespace WebEd\Base\ModulesManagement\Providers;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use WebEd\Base\ModulesManagement\Models\Plugins;
-use WebEd\Base\ModulesManagement\Repositories\Contracts\PluginsRepositoryContract;
-use WebEd\Base\ModulesManagement\Repositories\PluginsRepository;
-use WebEd\Base\ModulesManagement\Repositories\PluginsRepositoryCacheDecorator;
+use CleanSoft\Modules\Core\ModulesManagement\Models\CoreModules;
+use CleanSoft\Modules\Core\ModulesManagement\Models\Plugins;
+use CleanSoft\Modules\Core\ModulesManagement\Repositories\Contracts\CoreModulesRepositoryContract;
+use CleanSoft\Modules\Core\ModulesManagement\Repositories\Contracts\PluginsRepositoryContract;
+use CleanSoft\Modules\Core\ModulesManagement\Repositories\CoreModulesRepository;
+use CleanSoft\Modules\Core\ModulesManagement\Repositories\CoreModulesRepositoryCacheDecorator;
+use CleanSoft\Modules\Core\ModulesManagement\Repositories\PluginsRepository;
+use CleanSoft\Modules\Core\ModulesManagement\Repositories\PluginsRepositoryCacheDecorator;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -20,6 +24,16 @@ class RepositoryServiceProvider extends ServiceProvider
 
             if (config('webed-caching.repository.enabled')) {
                 return new PluginsRepositoryCacheDecorator($repository);
+            }
+
+            return $repository;
+        });
+
+        $this->app->bind(CoreModulesRepositoryContract::class, function () {
+            $repository = new CoreModulesRepository(new CoreModules());
+
+            if (config('webed-caching.repository.enabled')) {
+                return new CoreModulesRepositoryCacheDecorator($repository);
             }
 
             return $repository;

@@ -1,30 +1,16 @@
-<?php namespace WebEd\Base\ModulesManagement\Repositories;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Repositories;
 
-use WebEd\Base\Core\Repositories\AbstractBaseRepository;
-use WebEd\Base\Caching\Services\Contracts\CacheableContract;
+use CleanSoft\Modules\Core\Repositories\Eloquent\EloquentBaseRepository;
+use CleanSoft\Modules\Core\ModulesManagement\Repositories\Contracts\PluginsRepositoryContract;
 
-use WebEd\Base\ModulesManagement\Repositories\Contracts\PluginsRepositoryContract;
-
-class PluginsRepository extends AbstractBaseRepository implements PluginsRepositoryContract, CacheableContract
+class PluginsRepository extends EloquentBaseRepository implements PluginsRepositoryContract
 {
-    protected $rules = [
-        'alias' => 'string|max:255|alpha_dash',
-        'installed_version' => 'string|max:255',
-    ];
-
-    protected $editableFields = [
-        'alias',
-        'installed_version',
-        'enabled',
-        'installed',
-    ];
-
     /**
      * @param $alias
-     * @return mixed
+     * @return mixed|null
      */
     public function getByAlias($alias)
     {
-        return $this->where('alias', '=', $alias)->first();
+        return $this->model->where('alias', '=', $alias)->first();
     }
 }

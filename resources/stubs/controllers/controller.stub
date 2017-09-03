@@ -1,13 +1,113 @@
 <?php namespace DummyNamespace;
 
-use WebEd\Base\Core\Http\Controllers\BaseAdminController;
+use Illuminate\Http\Request;
+use WebEd\Base\Http\Controllers\BaseAdminController;
+use WebEd\Base\Http\DataTables\AbstractDataTables;
+use WebEd\Base\Repositories\Eloquent\EloquentBaseRepository;
+use Yajra\Datatables\Engines\BaseEngine;
 
 class DummyClass extends BaseAdminController
 {
     protected $module = '{alias}';
 
-    public function __construct()
+    /**
+     * @var YourModuleRepositoryContract|EloquentBaseRepository
+     */
+    protected $repository;
+
+    /**
+     * @param EloquentBaseRepository $repository
+     */
+    public function __construct(YourModuleRepositoryContract $repository)
     {
         parent::__construct();
+
+        $this->repository = $repository;
+
+        $this->middleware(function (Request $request, $next) {
+            $this->getDashboardMenu($this->module);
+
+            $this->breadcrumbs->addLink(trans($this->module . '::base.page_title'), route('admin::your-module.index.get'));
+
+            return $next($request);
+        });
+    }
+
+    /**
+     * @param AbstractDataTables|BaseEngine $dataTables
+     * @return @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function getIndex(YourDataTables $dataTables)
+    {
+        $this->setPageTitle(trans($this->module . '::base.page_title'));
+
+        $this->dis['dataTable'] = $dataTables->run();
+
+        return do_filter(BASE_FILTER_CONTROLLER, $this, '{alias}', 'index.get', $dataTables)->viewAdmin('index');
+    }
+
+    /**
+     * @param AbstractDataTables|BaseEngine $dataTables
+     * @return mixed
+     */
+    public function postListing(YourDataTables $dataTables)
+    {
+        $data = $dataTables->with($this->groupAction());
+
+        return do_filter(BASE_FILTER_CONTROLLER, $data, '{alias}', 'index.post', $this);
+    }
+
+    /**
+     * Handle group actions
+     * @return array
+     */
+    protected function groupAction()
+    {
+        $data = [];
+        if ($this->request->get('customActionType', null) === 'group_action') {
+            if (!$this->userRepository->hasPermission($this->loggedInUser, ['your-permission'])) {
+                return [
+                    'customActionMessage' => trans('webed-acl::base.do_not_have_permission'),
+                    'customActionStatus' => 'danger',
+                ];
+            }
+
+            $ids = (array)$this->request->get('id', []);
+            $actionValue = $this->request->get('customActionValue');
+
+            switch ($actionValue) {
+                case 'deleted':
+                    if (!$this->userRepository->hasPermission($this->loggedInUser, ['your-permission'])) {
+                        return [
+                            'customActionMessage' => trans('webed-acl::base.do_not_have_permission'),
+                            'customActionStatus' => 'danger',
+                        ];
+                    }
+                    /**
+                     * Delete items
+                     */
+                     $ids = do_filter(BASE_FILTER_BEFORE_DELETE, $ids, '{alias}');
+
+                     $result = $this->repository->delete($ids);
+
+                     do_action(BASE_ACTION_AFTER_DELETE, '{alias}', $ids, $result);
+                    break;
+                case 0:
+                case 1:
+                    $result = $this->repository->updateMultiple($ids, [
+                        'status' => $actionValue,
+                    ]);
+                    break;
+                default:
+                    return [
+                        'customActionMessage' => trans('webed-core::errors.' . \Constants::METHOD_NOT_ALLOWED . '.message'),
+                        'customActionStatus' => 'danger'
+                    ];
+                    break;
+            }
+            $data['customActionMessage'] = $result ? trans('webed-core::base.form.request_completed') : trans('webed-core::base.form.error_occurred');
+            $data['customActionStatus'] = !$result ? 'danger' : 'success';
+        }
+        return $data;
     }
 }

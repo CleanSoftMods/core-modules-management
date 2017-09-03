@@ -1,4 +1,4 @@
-<?php namespace WebEd\Base\ModulesManagement\Facades;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
@@ -9,6 +9,6 @@ class ModulesManagementFacade extends Facade
      */
     protected static function getFacadeAccessor()
     {
-        return \WebEd\Base\ModulesManagement\Support\ModulesManagement::class;
+        return \CleanSoft\Modules\Core\ModulesManagement\Support\ModulesManagement::class;
     }
 }

@@ -1,27 +1,26 @@
-<?php namespace WebEd\Base\ModulesManagement\Http\Controllers;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Http\Controllers;
 
-use WebEd\Base\Core\Http\Controllers\BaseAdminController;
-use WebEd\Base\Core\Support\DataTable\DataTables;
-use WebEd\Base\ModulesManagement\Http\DataTables\PluginsListDataTable;
-use WebEd\Base\ModulesManagement\Repositories\Contracts\PluginsRepositoryContract;
-use WebEd\Base\ModulesManagement\Repositories\PluginsRepository;
+use CleanSoft\Modules\Core\Http\Controllers\BaseAdminController;
+use CleanSoft\Modules\Core\ModulesManagement\Actions\DisablePluginAction;
+use CleanSoft\Modules\Core\ModulesManagement\Actions\EnablePluginAction;
+use CleanSoft\Modules\Core\ModulesManagement\Actions\InstallPluginAction;
+use CleanSoft\Modules\Core\ModulesManagement\Actions\UninstallPluginAction;
+use CleanSoft\Modules\Core\ModulesManagement\Actions\UpdatePluginAction;
+use CleanSoft\Modules\Core\ModulesManagement\Http\DataTables\PluginsListDataTable;
 use Illuminate\Support\Facades\Artisan;
+use Yajra\Datatables\Engines\BaseEngine;
 
 class PluginsController extends BaseAdminController
 {
-    protected $module = 'webed-modules-management';
-
-    protected $dashboardMenuId = 'webed-plugins';
+    /**
+     * @var string
+     */
+    protected $module = WEBED_MODULES_MANAGEMENT;
 
     /**
-     * @param PluginsRepository $repository
+     * @var string
      */
-    public function __construct(PluginsRepositoryContract $repository)
-    {
-        parent::__construct();
-
-        $this->repository = $repository;
-    }
+    protected $dashboardMenuId = 'webed-plugins';
 
     /**
      * Get index page
@@ -29,81 +28,78 @@ class PluginsController extends BaseAdminController
      */
     public function getIndex(PluginsListDataTable $dataTable)
     {
-        $this->breadcrumbs->addLink('Plugins');
+        $this->breadcrumbs->addLink(trans($this->module . '::base.plugins'));
 
-        $this->setPageTitle('Plugins');
+        $this->setPageTitle(trans($this->module . '::base.plugins'));
 
         $this->getDashboardMenu($this->dashboardMenuId);
 
         $this->dis['dataTable'] = $dataTable->run();
 
-        return do_filter('webed-modules-plugin.index.get', $this)->viewAdmin('plugins-list');
+        return do_filter(BASE_FILTER_CONTROLLER, $this, WEBED_PLUGINS, 'index.get', $dataTable)->viewAdmin('plugins-list');
     }
 
     /**
      * Set data for DataTable plugin
-     * @param DataTables $dataTable
+     * @param PluginsListDataTable|BaseEngine $dataTable
      * @return \Illuminate\Http\JsonResponse
      */
     public function postListing(PluginsListDataTable $dataTable)
     {
-        return do_filter('datatables.webed-modules-plugin.index.post', $dataTable, $this);
+        return do_filter(BASE_FILTER_CONTROLLER, $dataTable, WEBED_PLUGINS, 'index.post', $this);
     }
 
-    public function postChangeStatus($module, $status)
+    /**
+     * @param $alias
+     * @param $status
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function postChangeStatus($alias, $status)
     {
         switch ((bool)$status) {
             case true:
-                return modules_management()->enableModule($module)->refreshComposerAutoload();
+                $result = app(EnablePluginAction::class)->run($alias);
                 break;
             default:
-                return modules_management()->disableModule($module)->refreshComposerAutoload();
+                $result = app(DisablePluginAction::class)->run($alias);
                 break;
         }
+        return response()->json($result, $result['response_code']);
     }
 
-    public function postInstall($alias)
+    /**
+     * @param InstallPluginAction $action
+     * @param $alias
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function postInstall(InstallPluginAction $action, $alias)
     {
-        $module = get_module_information($alias);
+        $result = $action->run($alias);
 
-        if(!$module) {
-            return response_with_messages('Plugin not exists', true, \Constants::ERROR_CODE);
-        }
-
-        Artisan::call('module:install', [
-            'alias' => $alias
-        ]);
-
-        return response_with_messages('Installed plugin dependencies');
+        return response()->json($result, $result['response_code']);
     }
 
-    public function postUpdate($alias)
+    /**
+     * @param UpdatePluginAction $action
+     * @param $alias
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function postUpdate(UpdatePluginAction $action, $alias)
     {
-        $module = get_module_information($alias);
+        $result = $action->run($alias);
 
-        if(!$module) {
-            return response_with_messages('Plugin not exists', true, \Constants::ERROR_CODE);
-        }
-
-        Artisan::call('module:update', [
-            'alias' => $alias
-        ]);
-
-        return response_with_messages('This plugin has been updated');
+        return response()->json($result, $result['response_code']);
     }
 
-    public function postUninstall($alias)
+    /**
+     * @param UninstallPluginAction $action
+     * @param $alias
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function postUninstall(UninstallPluginAction $action, $alias)
     {
-        $module = get_module_information($alias);
+        $result = $action->run($alias);
 
-        if(!$module) {
-            return response_with_messages('Plugin not exists', true, \Constants::ERROR_CODE);
-        }
-
-        Artisan::call('module:uninstall', [
-            'alias' => $alias
-        ]);
-
-        return response_with_messages('Uninstalled plugin dependencies');
+        return response()->json($result, $result['response_code']);
     }
 }

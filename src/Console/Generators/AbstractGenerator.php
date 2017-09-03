@@ -1,6 +1,6 @@
-<?php namespace WebEd\Base\ModulesManagement\Console\Generators;
+<?php namespace CleanSoft\Modules\Core\ModulesManagement\Console\Generators;
 
-use WebEd\Base\Core\Console\Generators\BaseAbstractGenerator;
+use CleanSoft\Modules\Core\Console\Generators\BaseAbstractGenerator;
 
 abstract class AbstractGenerator extends BaseAbstractGenerator
 {
@@ -10,49 +10,16 @@ abstract class AbstractGenerator extends BaseAbstractGenerator
     protected $moduleInformation;
 
     /**
-     * Get root folder of every modules by module type
-     * @param array $type
-     * @return string
-     */
-    protected function resolveModuleRootFolder($module)
-    {
-        switch (array_get($module, 'type')) {
-            case 'base':
-                $path = webed_base_path();
-                break;
-            case 'plugin':
-            default:
-                $path = webed_plugins_path();
-                break;
-        }
-        if (!ends_with('/', $path)) {
-            $path .= '/';
-        }
-
-        return $path;
-    }
-
-    /**
      * Current module information
      * @return array
      */
-    protected function getCurrentModule()
-    {
-        $alias = $this->argument('alias');
+    abstract protected function getCurrentModule();
 
-        $module = get_module_information($alias);
-
-        if(!$module) {
-            $this->error('Module not exists');
-            die();
-        }
-
-        $moduleRootFolder = $this->resolveModuleRootFolder($module);
-
-        return $this->moduleInformation = array_merge($module, [
-            'module-path' => $moduleRootFolder . basename(str_replace('/module.json', '', $module['file'])) . '/'
-        ]);
-    }
+    /**
+     * Get root folder of every modules by module type
+     * @return string
+     */
+    abstract protected function resolveModuleRootFolder();
 
     /**
      * Get module information by key

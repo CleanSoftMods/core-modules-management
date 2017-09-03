@@ -1,39 +1,29 @@
 <?php namespace DummyNamespace\Providers;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use CleanSoft\Modules\Core\Events\SessionStarted;
 
 class BootstrapModuleServiceProvider extends ServiceProvider
 {
-    protected $module = 'DummyNamespace';
-
     /**
-     * Bootstrap the application services.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        app()->booted(function () {
-            $this->booted();
-        });
-    }
-
-    /**
-     * Register the application services.
+     * Register any application services.
      *
      * @return void
      */
     public function register()
     {
-
+        Event::listen(SessionStarted::class, function () {
+            $this->onSessionStarted();
+        });
     }
 
-    private function booted()
+    /**
+     * Register dashboard menus, translations, cms settings
+     */
+    protected function onSessionStarted()
     {
-        /**
-         * Register to dashboard menu
-         */
-        /*\DashboardMenu::registerItem([
+        /*dashboard_menu()->registerItem([
             'id' => 'DummyAlias',
             'priority' => 20,
             'parent_id' => null,
